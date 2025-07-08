@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvertEase - Fast File Conversion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ConvertEase</h1>
+            <p>Fast, Easy, and Secure File Conversion</p>
+        </div>
+
+        <div class="converter-container">
+            <div class="conversion-types">
+                <div class="conversion-type active" data-type="document">
+                    <h3>📄 Documents</h3>
+                    <p>PDF, DOCX, TXT, RTF</p>
+                </div>
+                <div class="conversion-type" data-type="image">
+                    <h3>🖼️ Images</h3>
+                    <p>JPG, PNG, GIF, WEBP</p>
+                </div>
+                <div class="conversion-type" data-type="video">
+                    <h3>🎥 Videos</h3>
+                    <p>MP4, AVI, MOV, MKV</p>
+                </div>
+                <div class="conversion-type" data-type="audio">
+                    <h3>🎵 Audio</h3>
+                    <p>MP3, WAV, FLAC, AAC</p>
+                </div>
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">☁️</div>
+                <h3>Drag & Drop Your File Here</h3>
+                <p>or click to browse</p>
+                <input type="file" id="fileInput" style="display: none;" />
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <button class="file-remove" id="fileRemove" title="Remove file">×</button>
+                <h4>File Information</h4>
+                <p id="fileName"></p>
+                <p id="fileSize"></p>
+                <p id="fileType"></p>
+            </div>
+
+            <div class="format-selector">
+                <select class="format-select" id="fromFormat">
+                    <option value="">Select input format</option>
+                </select>
+                <div class="arrow">→</div>
+                <select class="format-select" id="toFormat">
+                    <option value="">Select output format</option>
+                </select>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                Convert File
+            </button>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Converting...</div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3>✅ Conversion Complete!</h3>
+                <p>Your file has been converted successfully.</p>
+                <button class="download-btn" id="downloadBtn">Download Converted File</button>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Lightning Fast</h3>
+                <p>Convert files in seconds with our optimized servers</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>100% Secure</h3>
+                <p>Your files are processed securely and deleted after conversion</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>High Quality</h3>
+                <p>Maintain original quality with our advanced conversion algorithms</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
