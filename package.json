@@ -1,0 +1,16 @@
+{
+  "name": "filecon-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for FileCon file conversion",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build required'"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {},
+  "keywords": ["netlify", "functions", "file-conversion", "cloudmersive"],
+  "author": "Your Name",
+  "license": "MIT"
+}

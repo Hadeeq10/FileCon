@@ -1,22 +1,20 @@
-// Updated script.js with Cloudmersive integration
-
-// Format definitions (supported conversions)
+// Format definitions
 const formats = {
     document: {
-        input: ['pdf', 'docx', 'txt', 'rtf', 'html'],
-        output: ['pdf', 'docx', 'txt']
+        input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
+        output: ['pdf', 'docx', 'txt', 'rtf', 'odt', 'html']
     },
     image: {
-        input: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
-        output: ['jpg', 'png', 'gif', 'webp']
+        input: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg'],
+        output: ['jpg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg']
     },
     video: {
-        input: ['mp4', 'avi', 'mov', 'mkv', 'webm'],
-        output: ['mp4', 'avi']
+        input: ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm'],
+        output: ['mp4', 'avi', 'mov', 'mkv', 'webm', 'gif']
     },
     audio: {
-        input: ['mp3', 'wav', 'flac', 'aac', 'ogg'],
-        output: ['mp3', 'wav']
+        input: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a'],
+        output: ['mp3', 'wav', 'flac', 'aac', 'ogg']
     }
 };
 
@@ -41,7 +39,10 @@ const conversionTypes = document.querySelectorAll('.conversion-type');
 
 let selectedFile = null;
 let currentConversionType = 'document';
-let convertedFileData = null;
+let conversionData = null;
+
+// API base URL - will be the current domain + /api/
+const API_BASE = window.location.origin;
 
 // Initialize
 updateFormatOptions();
@@ -97,12 +98,6 @@ function handleFileSelect(e) {
 }
 
 function handleFileSelection(file) {
-    // Validate file size (100MB limit)
-    if (file.size > 100 * 1024 * 1024) {
-        showError('File size exceeds 100MB limit');
-        return;
-    }
-
     selectedFile = file;
     displayFileInfo(file);
     detectFileFormat(file);
@@ -188,9 +183,6 @@ function checkConvertReady() {
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.style.display = 'block';
-    setTimeout(() => {
-        hideError();
-    }, 5000);
 }
 
 function hideError() {
@@ -199,7 +191,7 @@ function hideError() {
 
 function resetConverter() {
     selectedFile = null;
-    convertedFileData = null;
+    conversionData = null;
     fileInfo.style.display = 'none';
     progressContainer.style.display = 'none';
     resultContainer.style.display = 'none';
@@ -231,48 +223,92 @@ async function convertFile() {
         progressContainer.style.display = 'block';
         resultContainer.style.display = 'none';
         convertBtn.disabled = true;
-        updateProgress(20, 'Preparing file...');
+        progressFill.style.width = '10%';
+        progressText.textContent = 'Preparing upload...';
 
-        // Convert file to base64
-        const fileData = await fileToBase64(selectedFile);
-        updateProgress(40, 'Uploading file...');
-
-        // Make conversion request
-        const response = await fetch('/.netlify/functions/convert', {
+        // Step 1: Get upload URL
+        const uploadResponse = await fetch(`${API_BASE}/.netlify/functions/convert`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                fromFormat: fromFormat.value,
-                toFormat: toFormat.value,
+                action: 'upload',
                 filename: selectedFile.name,
-                fileData: fileData
+                filesize: selectedFile.size
             })
         });
 
-        updateProgress(70, 'Processing conversion...');
-
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Conversion failed');
+        const uploadData = await uploadResponse.json();
+        
+        if (!uploadData.success) {
+            throw new Error(uploadData.message || 'Failed to prepare upload');
         }
 
-        updateProgress(100, 'Conversion complete!');
+        progressFill.style.width = '30%';
+        progressText.textContent = 'Uploading file...';
 
-        // Store converted file data
-        convertedFileData = {
-            data: result.data,
-            filename: result.filename,
-            contentType: result.contentType
-        };
+        // Step 2: Upload file to CloudConvert
+        const formData = new FormData();
+        Object.entries(uploadData.uploadData).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
+        formData.append('file', selectedFile);
 
-        // Show result after a brief delay
+        const uploadResult = await fetch(uploadData.uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!uploadResult.ok) {
+            throw new Error('Failed to upload file');
+        }
+
+        progressFill.style.width = '50%';
+        progressText.textContent = 'Starting conversion...';
+
+        // Step 3: Start conversion
+        const convertResponse = await fetch(`${API_BASE}/.netlify/functions/convert`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'convert',
+                taskId: uploadData.taskId,
+                fromFormat: fromFormat.value,
+                toFormat: toFormat.value,
+                filename: selectedFile.name.replace(/\.[^/.]+$/, '') + '.' + toFormat.value
+            })
+        });
+
+        const convertData = await convertResponse.json();
+        
+        if (!convertData.success) {
+            throw new Error(convertData.message || 'Failed to start conversion');
+        }
+
+        progressFill.style.width = '70%';
+        progressText.textContent = 'Converting file...';
+
+        // Step 4: Poll for completion
+        const conversionResult = await pollConversion(convertData.conversionId);
+        
+        if (!conversionResult.success) {
+            throw new Error(conversionResult.message || 'Conversion failed');
+        }
+
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Conversion complete!';
+
+        // Store conversion data for download
+        conversionData = conversionResult;
+
+        // Show result
         setTimeout(() => {
             progressContainer.style.display = 'none';
             resultContainer.style.display = 'block';
-            convertBtn.disabled = false;
+            downloadBtn.onclick = () => downloadFile(conversionResult.downloadUrl, conversionResult.filename);
         }, 1000);
 
     } catch (error) {
@@ -283,57 +319,53 @@ async function convertFile() {
     }
 }
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            // Remove the data URL prefix (data:mime/type;base64,)
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = error => reject(error);
-    });
-}
+async function pollConversion(conversionId) {
+    const maxAttempts = 30;
+    const pollInterval = 2000; // 2 seconds
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+            const response = await fetch(`${API_BASE}/.netlify/functions/convert`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'status',
+                    conversionId: conversionId
+                })
+            });
 
-function updateProgress(percentage, message) {
-    progressFill.style.width = `${percentage}%`;
-    progressText.textContent = message;
-}
+            const data = await response.json();
+            
+            if (data.success && data.status === 'completed') {
+                return data;
+            } else if (data.success && data.status === 'failed') {
+                throw new Error(data.message || 'Conversion failed');
+            }
 
-// Download functionality
-downloadBtn.addEventListener('click', () => {
-    if (!convertedFileData) {
-        showError('No converted file available');
-        return;
-    }
+            // Update progress based on status
+            if (data.status === 'processing') {
+                const progress = Math.min(70 + (attempt * 2), 95);
+                progressFill.style.width = `${progress}%`;
+            }
 
-    try {
-        // Convert base64 to blob
-        const byteCharacters = atob(convertedFileData.data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+        } catch (error) {
+            if (attempt === maxAttempts - 1) {
+                throw error;
+            }
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: convertedFileData.contentType });
-
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = convertedFileData.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-    } catch (error) {
-        console.error('Download error:', error);
-        showError('Failed to download file');
     }
-});
+    
+    throw new Error('Conversion timed out');
+}
 
-// Initialize the first conversion type as active
-document.querySelector('[data-type="document"]').classList.add('active');
+function downloadFile(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
