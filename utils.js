@@ -1,4 +1,4 @@
-// Utility functions for ConvertEase application
+// Utility functions for FileCon application
 
 /**
  * Format file size in human readable format
