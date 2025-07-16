@@ -1,4 +1,4 @@
-// Configuration file for ConvertEase application
+// Configuration file for FileCon application
 const CONFIG = {
     // API Configuration
     API: {
