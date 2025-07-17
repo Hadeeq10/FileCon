@@ -1,203 +1,189 @@
+/* Base Theme Variables */
 :root {
-  --bg-color: #f9f9f9;
-  --text-color: #333;
-  --primary-color: #4a90e2;
-  --secondary-color: #ffffff;
-  --border-color: #ddd;
-  --hover-bg: #e6f0ff;
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --muted: #f3f4f6;
+  --border: #e5e7eb;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-body.dark-mode {
-  --bg-color: #1e1e1e;
-  --text-color: #f1f1f1;
-  --primary-color: #4a90e2;
-  --secondary-color: #2c2c2c;
-  --border-color: #444;
-  --hover-bg: #333;
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --muted: #1e293b;
+  --border: #334155;
+  --shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
 }
 
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-header {
-  padding: 20px;
-  background-color: var(--primary-color);
-  color: #fff;
-  text-align: center;
-  font-size: 2em;
-  font-weight: bold;
+header.navbar {
+  background: var(--muted);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
+.logo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent);
 }
 
-#uploadArea {
-  border: 2px dashed var(--primary-color);
-  background-color: var(--secondary-color);
-  padding: 40px;
-  text-align: center;
+.theme-toggle {
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-bottom: 20px;
+  color: var(--text);
+  font-size: 1.2rem;
 }
 
-#uploadArea.dragover {
-  background-color: var(--hover-bg);
-}
-
-#fileInfo {
-  margin-bottom: 20px;
-  background: var(--secondary-color);
-  padding: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+.icon-dark {
   display: none;
 }
-
-#fileRemove {
-  color: var(--primary-color);
-  cursor: pointer;
-  font-weight: bold;
+[data-theme="dark"] .icon-light {
+  display: none;
+}
+[data-theme="dark"] .icon-dark {
+  display: inline;
 }
 
-select, button {
-  padding: 10px 15px;
-  margin: 10px 5px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: var(--secondary-color);
-  color: var(--text-color);
-  font-size: 1em;
-  cursor: pointer;
+.main-section {
+  padding: 2rem 1rem;
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-button {
-  background-color: var(--primary-color);
-  color: white;
+.upload-box {
+  border: 2px dashed var(--border);
+  padding: 3rem;
+  border-radius: 1rem;
+  background: var(--muted);
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.upload-box:hover {
+  background: var(--border);
+}
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.format-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.formats {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+select {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button#convertBtn,
+button#downloadBtn {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
   border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
 }
-
+button#convertBtn:hover,
+button#downloadBtn:hover {
+  background: var(--accent-hover);
+}
 button:disabled {
-  background-color: #ccc;
+  background: #9ca3af;
   cursor: not-allowed;
 }
 
-#convertBtn {
-  display: block;
-  margin: 20px auto;
+.progress-box,
+.result-box {
+  text-align: center;
 }
 
-.conversion-type {
-  display: inline-block;
-  padding: 10px 15px;
-  margin: 10px 5px;
-  border: 1px solid var(--primary-color);
-  border-radius: 20px;
-  cursor: pointer;
-  background-color: var(--secondary-color);
-  transition: background 0.3s;
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
 }
 
-.conversion-type.active {
-  background-color: var(--primary-color);
-  color: white;
+.error-message {
+  color: #ef4444;
+  background: #fee2e2;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
 }
 
-#errorMessage {
-  color: red;
-  margin-top: 10px;
-  display: none;
+.footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.875rem;
+  background: var(--muted);
+  border-top: 1px solid var(--border);
 }
 
-#progressContainer {
-  display: none;
-  background: var(--secondary-color);
-  padding: 10px;
-  border-radius: 6px;
-  margin: 20px 0;
-}
-
-#progressFill {
-  height: 20px;
-  width: 0;
-  background-color: var(--primary-color);
-  border-radius: 6px;
-  transition: width 0.3s ease;
-}
-
-#progressText {
-  margin-top: 5px;
-  font-size: 0.9em;
-}
-
-#resultContainer {
-  display: none;
-  margin-top: 20px;
-}
-
-#darkModeToggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: transparent;
-  border: 2px solid white;
-  padding: 5px 10px;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 0.9em;
-}
-
-/* Responsive Design */
-
-@media screen and (max-width: 768px) {
-  .container {
-    padding: 15px;
+/* Responsive Styles */
+@media (max-width: 600px) {
+  .formats {
+    flex: 1 1 100%;
   }
 
-  #uploadArea {
-    padding: 30px 15px;
-    font-size: 0.95em;
-  }
-
-  select, button {
-    width: 100%;
-    margin: 10px 0;
-  }
-
-  .conversion-type {
-    display: block;
-    width: 100%;
-    text-align: center;
-  }
-
-  #darkModeToggle {
-    top: 10px;
-    right: 10px;
-    font-size: 0.8em;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  header {
-    font-size: 1.5em;
-    padding: 15px;
-  }
-
-  #uploadArea {
-    padding: 20px 10px;
-  }
-
-  .conversion-type {
-    padding: 8px;
-    margin: 6px 0;
+  .upload-box {
+    padding: 2rem;
   }
 }
