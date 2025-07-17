@@ -1,4 +1,7 @@
 // netlify/functions/convert.js
+
+require('dotenv').config();
+
 const https = require('https');
 const FormData = require('form-data');
 
