@@ -130,28 +130,35 @@ select {
   border: 1px solid var(--border);
   padding: 1rem;
   border-radius: 0.75rem;
-  text-align: center;
+  text-align: left;
   color: var(--text);
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
+.file-info button {
+  align-self: flex-start;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 0.5rem;
+}
+.file-info button:hover {
+  background: var(--accent-hover);
+}
+
 
 .file-info p {
   margin-bottom: 0.5rem;
 }
-
-.file-info button {
-  background: #ef4444;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.file-info button:hover {
-  background: #dc2626;
-}
-
 
 .button-container {
   width: 100%;
