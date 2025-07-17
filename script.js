@@ -221,70 +221,41 @@ function resetConverter() {
 }
 
 async function convertFile() {
-    if (!selectedFile) {
-        showError('Please select a file first');
-        return;
-    }
+  if (!selectedFile || selectedFile.length === 0) return;
 
-    if (!fromFormat.value || !toFormat.value) {
-        showError('Please select both input and output formats');
-        return;
-    }
+  convertBtn.disabled = true;
+  showProgress();
 
-    if (fromFormat.value === toFormat.value) {
-        showError('Input and output formats cannot be the same');
-        return;
-    }
+  try {
+    const base64Files = await Promise.all(selectedFile.map(file => readFileAsBase64(file)));
 
-    try {
-        progressContainer.style.display = 'block';
-        progressFill.style.width = '20%';
-        progressText.textContent = 'Reading file...';
-        convertBtn.disabled = true;
-        hideError();
+    const filePayload = selectedFile.map((file, i) => ({
+      filename: file.name,
+      fileData: base64Files[i],
+    }));
 
-        // Read file as base64
-        const base64File = await readFileAsBase64(selectedFile);
-        
-        progressFill.style.width = '50%';
-        progressText.textContent = 'Converting file...';
+    const response = await fetch('/.netlify/functions/convert', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fromFormat: fromFormat.value,
+        toFormat: toFormat.value,
+        files: filePayload,
+      }),
+    });
 
-        // Call your Netlify function
-        const response = await fetch(`${API_BASE}/.netlify/functions/convert`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                fromFormat: fromFormat.value,
-                toFormat: toFormat.value,
-                filename: selectedFile.name,
-                fileData: base64File
-            })
-        });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Conversion failed.');
 
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Conversion failed');
-        }
-
-        progressFill.style.width = '100%';
-        progressText.textContent = 'Conversion complete!';
-
-        conversionData = result;
-
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            resultContainer.style.display = 'block';
-            downloadBtn.onclick = () => downloadFileFromBase64(result.data, result.filename, result.contentType);
-        }, 500);
-        
-    } catch (error) {
-        showError(error.message || 'An error occurred during conversion');
-        progressContainer.style.display = 'none';
-        convertBtn.disabled = false;
-    }
+    showResults(data.results);
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    hideProgress();
+    convertBtn.disabled = false;
+  }
 }
 
 function readFileAsBase64(file) {
@@ -307,3 +278,18 @@ function downloadFileFromBase64(base64Data, filename, contentType) {
     link.click();
     document.body.removeChild(link);
 }
+
+function showResults(results) {
+  resultContainer.innerHTML = '';
+  resultContainer.style.display = 'block';
+
+  results.forEach(file => {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = `data:application/octet-stream;base64,${file.content}`;
+    downloadLink.download = file.filename;
+    downloadLink.textContent = `Download ${file.filename}`;
+    downloadLink.className = 'download-link';
+    resultContainer.appendChild(downloadLink);
+  });
+}
+
