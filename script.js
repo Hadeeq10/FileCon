@@ -53,6 +53,9 @@ uploadArea.addEventListener('drop', handleDrop);
 fileInput.addEventListener('change', handleFileSelect);
 fileRemove.addEventListener('click', resetConverter);
 convertBtn.addEventListener('click', convertFile);
+document.getElementById('addMoreFiles').addEventListener('click', () => {
+    fileInput.click();
+});
 
 // Theme toggle
 document.getElementById('themeSwitch').addEventListener('change', (e) => {
