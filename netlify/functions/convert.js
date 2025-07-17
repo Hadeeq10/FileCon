@@ -1,4 +1,114 @@
 // netlify/functions/convert.js
+
+const https = require('https');
+
+const CLOUDMERSIVE_API_KEY = process.env.CLOUDMERSIVE_API_KEY;
+
+const CONVERSION_ENDPOINTS = {
+  'docx-to-pdf': '/convert/docx/to/pdf',
+  'pdf-to-docx': '/convert/pdf/to/docx',
+  'pdf-to-txt': '/convert/pdf/to/txt',
+  'docx-to-txt': '/convert/docx/to/txt',
+  'txt-to-pdf': '/convert/txt/to/pdf',
+  'html-to-pdf': '/convert/html/to/pdf',
+  'rtf-to-pdf': '/convert/rtf/to/pdf',
+  'jpg-to-png': '/image/convert/jpg/to/png',
+  'png-to-jpg': '/image/convert/png/to/jpg',
+  'gif-to-png': '/image/convert/gif/to/png',
+  'bmp-to-png': '/image/convert/bmp/to/png',
+  'tiff-to-png': '/image/convert/tiff/to/png',
+  'webp-to-png': '/image/convert/webp/to/png',
+  'png-to-webp': '/image/convert/png/to/webp',
+  'jpg-to-webp': '/image/convert/jpg/to/webp',
+  'mp4-to-avi': '/video/convert/mp4/to/avi',
+  'avi-to-mp4': '/video/convert/avi/to/mp4',
+  'mov-to-mp4': '/video/convert/mov/to/mp4',
+  'mkv-to-mp4': '/video/convert/mkv/to/mp4',
+  'webm-to-mp4': '/video/convert/webm/to/mp4',
+  'mp3-to-wav': '/audio/convert/mp3/to/wav',
+  'wav-to-mp3': '/audio/convert/wav/to/mp3',
+  'flac-to-mp3': '/audio/convert/flac/to/mp3',
+  'aac-to-mp3': '/audio/convert/aac/to/mp3',
+  'ogg-to-mp3': '/audio/convert/ogg/to/mp3'
+};
+
+function getEndpoint(from, to) {
+  return CONVERSION_ENDPOINTS[`${from.toLowerCase()}-to-${to.toLowerCase()}`];
+}
+
+exports.handler = async (event) => {
+  try {
+    const { fileData, fromFormat, toFormat, filename } = JSON.parse(event.body);
+
+    if (!fileData || !fromFormat || !toFormat || !filename) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: 'Missing required fields' }),
+      };
+    }
+
+    const endpoint = getEndpoint(fromFormat, toFormat);
+
+    if (!endpoint) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: 'Unsupported conversion' }),
+      };
+    }
+
+    const options = {
+      hostname: 'api.cloudmersive.com',
+      path: endpoint,
+      method: 'POST',
+      headers: {
+        'Apikey': CLOUDMERSIVE_API_KEY,
+        'Content-Type': 'application/octet-stream'
+      }
+    };
+
+    const buffer = Buffer.from(fileData, 'base64');
+
+    const result = await new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        let data = Buffer.alloc(0);
+        res.on('data', chunk => {
+          data = Buffer.concat([data, chunk]);
+        });
+        res.on('end', () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(data);
+          } else {
+            reject(new Error(`Cloudmersive error: ${res.statusCode} ${data.toString()}`));
+          }
+        });
+      });
+
+      req.on('error', reject);
+      req.write(buffer);
+      req.end();
+    });
+
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: true,
+        data: result.toString('base64'),
+        filename: filename.replace(/\.[^/.]+$/, '') + '.' + toFormat
+      }),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ success: false, error: error.message || 'Internal error' }),
+    };
+  }
+};
+
+
+
+
 /*const https = require('https');
 const FormData = require('form-data');
 
@@ -240,66 +350,3 @@ exports.handler = async (event, context) => {
     };
   }
 };*/
-
-const fetch = require('node-fetch');
-
-exports.handler = async (event) => {
-  try {
-    const { fileData, fromFormat, toFormat, filename } = JSON.parse(event.body);
-
-    if (!fileData || !fromFormat || !toFormat || !filename) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ success: false, error: 'Missing required fields' })
-      };
-    }
-
-    const apiKey = process.env.CLOUDMERSIVE_API_KEY;
-    const endpoint = `https://api.cloudmersive.com/convert/${fromFormat}/to/${toFormat}`;
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Apikey': apiKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ FileBytes: fileData })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({
-          success: false,
-          error: `Cloudmersive error: ${response.status} ${errText}`
-        })
-      };
-    }
-
-    const buffer = await response.buffer();
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        success: true,
-        data: buffer.toString('base64'),
-        contentType: 'application/octet-stream',
-        filename: filename
-      })
-    };
-  } catch (err) {
-    console.error('Conversion error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        success: false,
-        error: 'Internal server error'
-      })
-    };
-  }
-};
-
