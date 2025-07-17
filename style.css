@@ -105,7 +105,10 @@ header.navbar {
   flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
+  justify-content: center; /* Center the contents */
+  text-align: center;
 }
+
 
 .formats {
   flex: 1 1 45%;
@@ -120,6 +123,12 @@ select {
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 button#convertBtn,
