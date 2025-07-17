@@ -1,5 +1,134 @@
 // Format definitions
-const formats = {
+
+import { formatOptions } from './config.js';
+import { base64ToBlob } from './util.js';
+
+// DOM Elements
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const fromSelect = document.getElementById('fromFormat');
+const toSelect = document.getElementById('toFormat');
+const convertBtn = document.getElementById('convertBtn');
+const statusText = document.getElementById('status');
+
+// Populate format dropdowns
+function populateFormatOptions() {
+  for (const category in formatOptions) {
+    for (const format of formatOptions[category]) {
+      const option = new Option(format.toUpperCase(), format);
+      fromSelect.appendChild(option.cloneNode(true));
+      toSelect.appendChild(option.cloneNode(true));
+    }
+  }
+}
+
+populateFormatOptions();
+
+// Handle file selection and drag-drop
+function handleFileSelect(file) {
+  if (!file) return;
+  fileInput.files = createFileList(file);
+  statusText.textContent = `Selected: ${file.name}`;
+}
+
+function createFileList(file) {
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  return dataTransfer.files;
+}
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  handleFileSelect(file);
+});
+
+fileInput.addEventListener('change', () => {
+  handleFileSelect(fileInput.files[0]);
+});
+
+// Main Conversion Function
+async function convertFile(file, fromFormat, toFormat) {
+  const reader = new FileReader();
+
+  reader.onload = async function () {
+    const base64Data = reader.result.split(',')[1]; // Remove the data URI prefix
+
+    const payload = {
+      fromFormat,
+      toFormat,
+      filename: file.name,
+      fileData: base64Data
+    };
+
+    try {
+      statusText.textContent = 'Converting...';
+
+      const response = await fetch('/.netlify/functions/convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const blob = base64ToBlob(result.data, result.contentType);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = result.filename;
+        downloadLink.click();
+        statusText.textContent = 'Conversion successful!';
+      } else {
+        statusText.textContent = 'Conversion failed: ' + result.error;
+      }
+    } catch (err) {
+      statusText.textContent = 'Error during conversion: ' + err.message;
+      console.error(err);
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+// Conversion Button Click
+convertBtn.addEventListener('click', () => {
+  const file = fileInput.files[0];
+  const fromFormat = fromSelect.value;
+  const toFormat = toSelect.value;
+
+  if (!file) {
+    alert('Please select a file first.');
+    return;
+  }
+
+  if (fromFormat === toFormat) {
+    alert('Please choose different formats to convert.');
+    return;
+  }
+
+  convertFile(file, fromFormat, toFormat);
+});
+
+
+
+
+
+
+
+/*const formats = {
     document: {
         input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
         output: ['pdf', 'docx', 'txt', 'rtf', 'odt', 'html']
@@ -368,4 +497,4 @@ function downloadFile(url, filename) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-}
+}*/
