@@ -54,6 +54,16 @@ fileInput.addEventListener('change', handleFileSelect);
 fileRemove.addEventListener('click', resetConverter);
 convertBtn.addEventListener('click', convertFile);
 
+// Theme toggle
+document.getElementById('themeSwitch').addEventListener('change', (e) => {
+  document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
+});
+
+// Fix upload trigger
+document.getElementById('uploadArea').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
 conversionTypes.forEach(type => {
     type.addEventListener('click', () => {
         conversionTypes.forEach(t => t.classList.remove('active'));
