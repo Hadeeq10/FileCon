@@ -203,9 +203,11 @@ function hideError() {
 }
 
 function resetConverter() {
-    selectedFile = null;
+    selectedFile = [];
     conversionData = null;
     fileInfo.style.display = 'none';
+    uploadArea.style.display = 'block';
+    document.getElementById('addMoreFiles').style.display = 'none';
     progressContainer.style.display = 'none';
     resultContainer.style.display = 'none';
     fromFormat.value = '';
