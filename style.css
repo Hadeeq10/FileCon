@@ -136,6 +136,10 @@ button#convertBtn:hover,
 button#downloadBtn:hover {
   background: var(--accent-hover);
 }
+#convertBtn {
+  display: block;
+  margin: 1.5rem auto 0 auto; /* top: 1.5rem, bottom: 0, auto horizontally */
+}
 button:disabled {
   background: #9ca3af;
   cursor: not-allowed;
