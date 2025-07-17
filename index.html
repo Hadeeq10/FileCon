@@ -3,69 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FileCon</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <title>FileCon - Convert Files Easily</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">FileCon</div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-      <i data-lucide="sun" class="icon-light"></i>
-      <i data-lucide="moon" class="icon-dark"></i>
-    </button>
+  <header class="header">
+    <h1>FileCon</h1>
+    <label class="theme-toggle">
+      <input type="checkbox" id="themeSwitch"/>
+      <span>🌞 / 🌙</span>
+    </label>
   </header>
 
-  <main class="main-section">
-    <section class="upload-box" id="uploadArea">
-      <input type="file" id="fileInput" hidden />
-      <i data-lucide="upload-cloud" class="upload-icon"></i>
-      <p>Click or drag file here to upload</p>
+  <main class="container">
+    <section class="upload-section">
+      <div class="upload-box" id="uploadArea">
+        <p>Click or drag & drop to upload a file</p>
+        <input type="file" id="fileInput" hidden />
+      </div>
+      <div id="fileInfo" class="file-info hidden">
+        <p id="fileName"></p>
+        <p id="fileSize"></p>
+        <p id="fileType"></p>
+        <button id="fileRemove">Remove</button>
+      </div>
     </section>
 
-    <section class="format-selectors">
-      <div class="formats">
-        <label>From</label>
+    <section class="convert-section">
+      <div class="format-select">
+        <label for="fromFormat">From:</label>
         <select id="fromFormat"></select>
-      </div>
-      <div class="formats">
-        <label>To</label>
+
+        <label for="toFormat">To:</label>
         <select id="toFormat"></select>
       </div>
-      <button id="convertBtn" disabled>Convert</button>
+      <button id="convertBtn" disabled>Convert File</button>
+      <p id="errorMessage" class="error-message"></p>
     </section>
 
-    <section id="progressContainer" class="progress-box" style="display: none;">
+    <section id="progressContainer" class="progress-container hidden">
       <div class="progress-bar">
         <div id="progressFill" class="progress-fill"></div>
       </div>
-      <p id="progressText">Preparing file...</p>
+      <p id="progressText">Starting conversion...</p>
     </section>
 
-    <section id="resultContainer" class="result-box" style="display: none;">
-      <p>Conversion Complete!</p>
-      <button id="downloadBtn">Download</button>
+    <section id="resultContainer" class="result-container hidden">
+      <button id="downloadBtn">Download Converted File</button>
     </section>
-
-    <div id="errorMessage" class="error-message" style="display: none;"></div>
   </main>
 
   <footer class="footer">
-    &copy; 2025 FileCon. All rights reserved.
+    <p>&copy; 2025 FileCon</p>
   </footer>
 
   <script src="script.js"></script>
-  <script>
-    lucide.createIcons();
-
-    const toggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
-
-    toggle.addEventListener('click', () => {
-      const currentTheme = html.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', newTheme);
-    });
-  </script>
 </body>
 </html>
