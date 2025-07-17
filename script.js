@@ -101,10 +101,20 @@ function handleFileSelect(e) {
 }
 
 function handleFileSelection(file) {
-    selectedFile = file;
-    displayFileInfo(file);
+    if (!selectedFile) {
+        selectedFile = [];
+    }
+
+    selectedFile.push(file);
+    displayFileInfoList();
     detectFileFormat(file);
+
+    // Hide upload box after first file
+    uploadArea.style.display = 'none';
+    document.getElementById('addMoreFiles').style.display = 'inline-block';
+
     hideError();
+    checkConvertReady();
 }
 
 function displayFileInfo(file) {
