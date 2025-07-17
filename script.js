@@ -1,4 +1,3 @@
-// Format definitions
 const formats = {
     document: {
         input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
@@ -38,13 +37,12 @@ const errorMessage = document.getElementById('errorMessage');
 const conversionTypes = document.querySelectorAll('.conversion-type');
 
 let selectedFile = null;
-let currentConversionType = 'document';
 let conversionData = null;
+let currentConversionType = 'document';
 
-// API base URL - will be the current domain + /api/
 const API_BASE = window.location.origin;
 
-// Initialize
+// Initialize UI
 updateFormatOptions();
 
 // Event listeners
@@ -56,7 +54,6 @@ fileInput.addEventListener('change', handleFileSelect);
 fileRemove.addEventListener('click', resetConverter);
 convertBtn.addEventListener('click', convertFile);
 
-// Conversion type selection
 conversionTypes.forEach(type => {
     type.addEventListener('click', () => {
         conversionTypes.forEach(t => t.classList.remove('active'));
@@ -67,9 +64,10 @@ conversionTypes.forEach(type => {
     });
 });
 
-// Format change listeners
 fromFormat.addEventListener('change', updateToFormatOptions);
 toFormat.addEventListener('change', checkConvertReady);
+
+// Functions
 
 function handleDragOver(e) {
     e.preventDefault();
@@ -219,153 +217,73 @@ async function convertFile() {
     }
 
     try {
-        // Show progress
         progressContainer.style.display = 'block';
-        resultContainer.style.display = 'none';
+        progressFill.style.width = '20%';
+        progressText.textContent = 'Reading file...';
         convertBtn.disabled = true;
-        progressFill.style.width = '10%';
-        progressText.textContent = 'Preparing upload...';
+        hideError();
 
-        // Step 1: Get upload URL
-        const uploadResponse = await fetch(`${API_BASE}/.netlify/functions/convert`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'upload',
-                filename: selectedFile.name,
-                filesize: selectedFile.size
-            })
-        });
-
-        const uploadData = await uploadResponse.json();
+        // Read file as base64
+        const base64File = await readFileAsBase64(selectedFile);
         
-        if (!uploadData.success) {
-            throw new Error(uploadData.message || 'Failed to prepare upload');
-        }
-
-        progressFill.style.width = '30%';
-        progressText.textContent = 'Uploading file...';
-
-        // Step 2: Upload file to CloudConvert
-        const formData = new FormData();
-        Object.entries(uploadData.uploadData).forEach(([key, value]) => {
-            formData.append(key, value);
-        });
-        formData.append('file', selectedFile);
-
-        const uploadResult = await fetch(uploadData.uploadUrl, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!uploadResult.ok) {
-            throw new Error('Failed to upload file');
-        }
-
         progressFill.style.width = '50%';
-        progressText.textContent = 'Starting conversion...';
-
-        // Step 3: Start conversion
-        const convertResponse = await fetch(`${API_BASE}/.netlify/functions/convert`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'convert',
-                taskId: uploadData.taskId,
-                fromFormat: fromFormat.value,
-                toFormat: toFormat.value,
-                filename: selectedFile.name.replace(/\.[^/.]+$/, '') + '.' + toFormat.value
-            })
-        });
-
-        const convertData = await convertResponse.json();
-        
-        if (!convertData.success) {
-            throw new Error(convertData.message || 'Failed to start conversion');
-        }
-
-        progressFill.style.width = '70%';
         progressText.textContent = 'Converting file...';
 
-        // Step 4: Poll for completion
-        const conversionResult = await pollConversion(convertData.conversionId);
-        
-        if (!conversionResult.success) {
-            throw new Error(conversionResult.message || 'Conversion failed');
+        // Call your Netlify function
+        const response = await fetch(`${API_BASE}/.netlify/functions/convert`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fromFormat: fromFormat.value,
+                toFormat: toFormat.value,
+                filename: selectedFile.name,
+                fileData: base64File
+            })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.error || 'Conversion failed');
         }
 
         progressFill.style.width = '100%';
         progressText.textContent = 'Conversion complete!';
 
-        // Store conversion data for download
-        conversionData = conversionResult;
+        conversionData = result;
 
-        // Show result
         setTimeout(() => {
             progressContainer.style.display = 'none';
             resultContainer.style.display = 'block';
-            downloadBtn.onclick = () => downloadFile(conversionResult.downloadUrl, conversionResult.filename);
-        }, 1000);
-
+            downloadBtn.onclick = () => downloadFileFromBase64(result.data, result.filename, result.contentType);
+        }, 500);
+        
     } catch (error) {
-        console.error('Conversion error:', error);
         showError(error.message || 'An error occurred during conversion');
         progressContainer.style.display = 'none';
         convertBtn.disabled = false;
     }
 }
 
-async function pollConversion(conversionId) {
-    const maxAttempts = 30;
-    const pollInterval = 2000; // 2 seconds
-    
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        try {
-            const response = await fetch(`${API_BASE}/.netlify/functions/convert`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'status',
-                    conversionId: conversionId
-                })
-            });
-
-            const data = await response.json();
-            
-            if (data.success && data.status === 'completed') {
-                return data;
-            } else if (data.success && data.status === 'failed') {
-                throw new Error(data.message || 'Conversion failed');
-            }
-
-            // Update progress based on status
-            if (data.status === 'processing') {
-                const progress = Math.min(70 + (attempt * 2), 95);
-                progressFill.style.width = `${progress}%`;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, pollInterval));
-        } catch (error) {
-            if (attempt === maxAttempts - 1) {
-                throw error;
-            }
-        }
-    }
-    
-    throw new Error('Conversion timed out');
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64String = reader.result.split(',')[1]; // Remove prefix "data:*/*;base64,"
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
-function downloadFile(url, filename) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+function downloadFileFromBase64(base64Data, filename, contentType) {
+    const link = document.createElement('a');
+    link.href = `data:${contentType};base64,${base64Data}`;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
