@@ -1,5 +1,5 @@
 // netlify/functions/convert.js
-const https = require('https');
+/*const https = require('https');
 const FormData = require('form-data');
 
 const CLOUDMERSIVE_API_KEY = process.env.CLOUDMERSIVE_API_KEY;
@@ -239,4 +239,67 @@ exports.handler = async (event, context) => {
       })
     };
   }
+};*/
+
+const fetch = require('node-fetch');
+
+exports.handler = async (event) => {
+  try {
+    const { fileData, fromFormat, toFormat, filename } = JSON.parse(event.body);
+
+    if (!fileData || !fromFormat || !toFormat || !filename) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: 'Missing required fields' })
+      };
+    }
+
+    const apiKey = process.env.CLOUDMERSIVE_API_KEY;
+    const endpoint = `https://api.cloudmersive.com/convert/${fromFormat}/to/${toFormat}`;
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Apikey': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ FileBytes: fileData })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({
+          success: false,
+          error: `Cloudmersive error: ${response.status} ${errText}`
+        })
+      };
+    }
+
+    const buffer = await response.buffer();
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        success: true,
+        data: buffer.toString('base64'),
+        contentType: 'application/octet-stream',
+        filename: filename
+      })
+    };
+  } catch (err) {
+    console.error('Conversion error:', err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        success: false,
+        error: 'Internal server error'
+      })
+    };
+  }
 };
+
