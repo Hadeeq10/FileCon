@@ -1,4 +1,5 @@
 // netlify/functions/convert.js
+require('dotenv').config();
 
 const https = require('https');
 
