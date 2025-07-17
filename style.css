@@ -169,6 +169,14 @@ button:disabled {
   text-align: center;
 }
 
+.description {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text);
+  margin-top: 1rem;
+}
+
+
 .footer {
   text-align: center;
   padding: 1rem;
