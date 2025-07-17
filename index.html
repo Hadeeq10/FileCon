@@ -1,121 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FileCon - Next-gen File Converter</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FileCon</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
-  <header class="header">
-    <div class="container">
-      <h1 class="logo">FileCon</h1>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#convert">Convert</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
+  <header class="navbar">
+    <div class="logo">FileCon</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <i data-lucide="sun" class="icon-light"></i>
+      <i data-lucide="moon" class="icon-dark"></i>
+    </button>
   </header>
 
-  <main>
-
-     <section id="convert" class="convert-section container">
-      <h3 class="section-title">Upload & Convert Your Files</h3>
-      <div id="uploadArea" class="upload-area">
-        <p>Drag & Drop your file here or <span class="upload-click">click to upload</span></p>
-        <input type="file" id="fileInput" hidden />
-      </div>
-      <div id="fileInfo" class="file-info" style="display:none;">
-        <p id="fileName"></p>
-        <p id="fileSize"></p>
-        <p id="fileType"></p>
-        <button id="fileRemove" class="btn-secondary">Remove File</button>
-      </div>
-
-      <div class="format-selectors">
-        <div class="select-group">
-          <label for="fromFormat">From Format</label>
-          <select id="fromFormat"></select>
-        </div>
-        <div class="select-group">
-          <label for="toFormat">To Format</label>
-          <select id="toFormat"></select>
-        </div>
-      </div>
-
-      <button id="convertBtn" class="btn-primary" disabled>Convert File</button>
-
-      <div id="progressContainer" class="progress-container" style="display:none;">
-        <div class="progress-bar">
-          <div id="progressFill" class="progress-fill"></div>
-        </div>
-        <p id="progressText" class="progress-text"></p>
-      </div>
-
-      <div id="resultContainer" class="result-container" style="display:none;">
-        <p>Conversion complete!</p>
-        <button id="downloadBtn" class="btn-primary">Download File</button>
-      </div>
-
-      <p id="errorMessage" class="error-message" style="display:none;"></p>
+  <main class="main-section">
+    <section class="upload-box" id="uploadArea">
+      <input type="file" id="fileInput" hidden />
+      <i data-lucide="upload-cloud" class="upload-icon"></i>
+      <p>Click or drag file here to upload</p>
     </section>
 
-    
-    <section class="hero">
-      <div class="container hero-content">
-        <div class="hero-text">
-          <h2>Convert Any File, Instantly.</h2>
-          <p>Fast, Secure & Easy-to-use file converter powered by Cloudmersive API.</p>
-          <button id="scrollToConvert" class="btn-primary">Try It Now</button>
-        </div>
-        <div class="hero-image">
-          <img src="https://cdn-icons-png.flaticon.com/512/2099/2099075.png" alt="File Conversion" />
-        </div>
+    <section class="format-selectors">
+      <div class="formats">
+        <label>From</label>
+        <select id="fromFormat"></select>
       </div>
-      <div class="wave-divider"></div>
+      <div class="formats">
+        <label>To</label>
+        <select id="toFormat"></select>
+      </div>
+      <button id="convertBtn" disabled>Convert</button>
     </section>
 
-    <section id="features" class="features container">
-      <h3 class="section-title">Why FileCon?</h3>
-      <div class="features-grid">
-        <div class="feature-card">
-          <img src="https://cdn-icons-png.flaticon.com/512/3415/3415719.png" alt="Speed Icon" />
-          <h4>Lightning Fast</h4>
-          <p>Get your files converted in seconds, no waiting around.</p>
-        </div>
-        <div class="feature-card">
-          <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Security Icon" />
-          <h4>Secure & Private</h4>
-          <p>Your files are processed safely and deleted immediately after conversion.</p>
-        </div>
-        <div class="feature-card">
-          <img src="https://cdn-icons-png.flaticon.com/512/1082/1082605.png" alt="Formats Icon" />
-          <h4>Multiple Formats</h4>
-          <p>Supports documents, images, audio & video formats — all in one place.</p>
-        </div>
+    <section id="progressContainer" class="progress-box" style="display: none;">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
       </div>
+      <p id="progressText">Preparing file...</p>
     </section>
 
-   
-    <section id="contact" class="contact container">
-      <h3 class="section-title">Get in Touch</h3>
-      <p>Have questions or feedback? Reach out to us at <a href="mailto:support@filecon.com">support@filecon.com</a>.</p>
+    <section id="resultContainer" class="result-box" style="display: none;">
+      <p>Conversion Complete!</p>
+      <button id="downloadBtn">Download</button>
     </section>
+
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
   </main>
 
   <footer class="footer">
-    <p>&copy; 2025 FileCon. Built with 💻 &amp; ☁️ Cloudmersive API.</p>
+    &copy; 2025 FileCon. All rights reserved.
   </footer>
 
   <script src="script.js"></script>
   <script>
-    // Scroll to convert section on button click
-    document.getElementById('scrollToConvert').addEventListener('click', () => {
-      document.getElementById('convert').scrollIntoView({ behavior: 'smooth' });
+    lucide.createIcons();
+
+    const toggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    toggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
     });
   </script>
 </body>
