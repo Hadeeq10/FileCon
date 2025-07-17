@@ -125,6 +125,34 @@ select {
   color: var(--text);
 }
 
+.file-info {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.file-info p {
+  margin-bottom: 0.5rem;
+}
+
+.file-info button {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.file-info button:hover {
+  background: #dc2626;
+}
+
+
 .button-container {
   width: 100%;
   display: flex;
