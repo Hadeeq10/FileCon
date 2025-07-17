@@ -7,7 +7,7 @@
 }
 
 body {
-  background: #0f2027;  /* Dark tech gradient */
+  background: #0f2027;
   background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
   color: #f0f4f8;
   min-height: 100vh;
@@ -21,7 +21,6 @@ body {
   margin: 0 auto;
 }
 
-/* Header */
 .header {
   padding: 1.5rem 0;
   background: rgba(15, 32, 39, 0.9);
@@ -58,7 +57,6 @@ body {
   color: #0ef;
 }
 
-/* Hero Section */
 .hero {
   padding: 6rem 0 4rem;
   background: transparent;
@@ -123,7 +121,6 @@ body {
   filter: drop-shadow(0 0 10px #0ef);
 }
 
-/* Wave divider */
 .wave-divider {
   position: absolute;
   bottom: 0;
@@ -134,7 +131,6 @@ body {
   pointer-events: none;
 }
 
-/* Features Section */
 .features {
   padding: 4rem 0 6rem;
   text-align: center;
@@ -154,7 +150,8 @@ body {
 }
 
 .feature-card {
-  background: rgba(15, 32, 39, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a1a1a;
   padding: 2rem 1.5rem;
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 239, 255, 0.15);
@@ -183,9 +180,9 @@ body {
   font-size: 1rem;
 }
 
-/* Convert Section */
 .convert-section {
-  background: rgba(15, 32, 39, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a1a1a;
   padding: 3rem 2rem;
   border-radius: 20px;
   box-shadow: 0 15px 30px rgba(0, 239, 255, 0.25);
@@ -193,13 +190,13 @@ body {
 }
 
 .upload-area {
-  background: #152a34;
+  background: rgba(255, 255, 255, 0.9);
   border: 2px dashed #0ef;
   padding: 3rem;
   text-align: center;
   border-radius: 15px;
   cursor: pointer;
-  color: #a0c8ff;
+  color: #1a1a1a;
   font-weight: 600;
   user-select: none;
   transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -300,7 +297,6 @@ select:focus {
   box-shadow: none;
 }
 
-/* Progress Bar */
 .progress-container {
   margin-top: 2rem;
   text-align: center;
@@ -329,7 +325,6 @@ select:focus {
   color: #0ef;
 }
 
-/* Result Container */
 .result-container {
   margin-top: 2rem;
   text-align: center;
@@ -342,7 +337,6 @@ select:focus {
   text-align: center;
 }
 
-/* Contact Section */
 .contact {
   text-align: center;
   padding-bottom: 4rem;
@@ -354,7 +348,6 @@ select:focus {
   text-decoration: underline;
 }
 
-/* Footer */
 .footer {
   background: rgba(15, 32, 39, 0.95);
   text-align: center;
@@ -366,7 +359,6 @@ select:focus {
   box-shadow: 0 -2px 15px rgba(0, 239, 255, 0.15);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .hero-content {
     flex-direction: column;
