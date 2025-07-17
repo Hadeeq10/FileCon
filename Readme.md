@@ -1,4 +1,4 @@
-# ConvertEase - File Conversion Application
+# FileCon - File Conversion Application
 
 A modern, user-friendly web application for converting various file formats including documents, images, videos, and audio files.
 
@@ -20,7 +20,7 @@ A modern, user-friendly web application for converting various file formats incl
 ## Project Structure
 
 ```
-convertease/
+FileCon/
 ├── index.html          # Main HTML file
 ├── style.css           # CSS styles
 ├── script.js           # Main JavaScript functionality
