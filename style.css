@@ -123,3 +123,56 @@ button#convertBtn:disabled {
   color: red;
   margin-top: 10px;
 }
+
+.progress-bar {
+  width: 100%;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-top: 1rem;
+  overflow: hidden;
+  display: none;
+}
+
+.progress-fill {
+  height: 1.2rem;
+  background-color: #4caf50;
+  color: white;
+  text-align: center;
+  line-height: 1.2rem;
+  font-size: 0.85rem;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.result-container {
+  margin-top: 1.5rem;
+}
+
+.file-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-result-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.file-result-download {
+  text-decoration: none;
+  color: #007BFF;
+  font-weight: bold;
+}
+
+.file-result-download:hover {
+  text-decoration: underline;
+}
+
+
