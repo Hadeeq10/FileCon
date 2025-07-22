@@ -38,6 +38,9 @@ const conversionTypes = document.querySelectorAll('.conversion-type');
 
 let selectedFile = [];
 
+selectedFile.push(file);
+displayFileInfo(file);
+
 let conversionData = null;
 let currentConversionType = 'document';
 
