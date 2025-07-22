@@ -106,35 +106,39 @@ function handleDrop(e) {
 }
 
 function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        handleFileSelection(file);
-    }
+  const file = e.target.files[0];
+  console.log("File selected:", file);  // Debug log
+  if (file) {
+    handleFileSelection(file);
+  }
 }
 
 function handleFileSelection(file) {
-    if (!selectedFile) {
-        selectedFile = [];
-    }
+  console.log("Handling file:", file);  // Debug log
 
-    selectedFile.push(file);
-    displayFileInfoList();
-    detectFileFormat(file);
+  selectedFile.push(file);  // Add file to the array
 
-    // Hide upload box after first file
-    uploadArea.style.display = 'none';
-    document.getElementById('addMoreFiles').style.display = 'inline-block';
+  // Show file details
+  displayFileInfo(file);
 
-    hideError();
-    checkConvertReady();
+  // Hide upload box after file is added
+  uploadArea.style.display = 'none';
+  document.getElementById('addMoreFiles').style.display = 'inline-block';
+
+  hideError();
+  checkConvertReady();
 }
+
 
 function displayFileInfo(file) {
-    fileName.textContent = `Name: ${file.name}`;
-    fileSize.textContent = `Size: ${formatFileSize(file.size)}`;
-    fileType.textContent = `Type: ${file.type || 'Unknown'}`;
-    fileInfo.style.display = 'block';
+  console.log("Displaying file info:", file);  // Debug log
+
+  fileName.textContent = `Name: ${file.name}`;
+  fileSize.textContent = `Size: ${formatFileSize(file.size)}`;
+  fileType.textContent = `Type: ${file.type || 'Unknown'}`;
+  fileInfo.style.display = 'block';
 }
+
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
