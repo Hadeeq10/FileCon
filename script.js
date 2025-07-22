@@ -69,7 +69,84 @@ toFormat.addEventListener('change', () => {
   convertBtn.disabled = !(selectedFile && fromFormat.value && toFormat.value);
 });
 
-convertBtn.addEventListener('click', convertFile);
+async function convertFile() {
+  if (!selectedFile) return;
+
+  progressBar.style.display = 'block';
+  progressFill.style.width = '0%';
+  progressFill.textContent = '0%';
+
+  const base64 = await readFileAsBase64(selectedFile);
+
+  progressFill.style.width = '30%';
+  progressFill.textContent = '30%';
+
+  const response = await fetch('/.netlify/functions/convert', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fromFormat: fromFormat.value,
+      toFormat: toFormat.value,
+      files: [{
+        filename: selectedFile.name,
+        fileData: base64
+      }]
+    })
+  });
+
+  progressFill.style.width = '70%';
+  progressFill.textContent = '70%';
+
+  const result = await response.json();
+
+  if (!response.ok || !result.results) {
+    errorMessage.textContent = result.error || 'Conversion failed';
+    errorMessage.style.display = 'block';
+    progressBar.style.display = 'none';
+    return;
+  }
+
+  resultContainer.innerHTML = '';
+  result.results.forEach(file => {
+    const fileCard = document.createElement('div');
+    fileCard.className = 'file-result';
+
+    const nameText = document.createElement('span');
+    nameText.textContent = file.filename;
+    nameText.className = 'file-result-name';
+
+    const downloadBtn = document.createElement('a');
+    downloadBtn.href = '#';
+    downloadBtn.textContent = '⬇ Download';
+    downloadBtn.className = 'file-result-download';
+    downloadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const blob = b64toBlob(file.content);
+      const url = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = url;
+      tempLink.download = file.filename;
+      tempLink.click();
+      URL.revokeObjectURL(url);
+    });
+
+    fileCard.appendChild(nameText);
+    fileCard.appendChild(downloadBtn);
+    resultContainer.appendChild(fileCard);
+  });
+
+  progressFill.style.width = '100%';
+  progressFill.textContent = '100%';
+
+  setTimeout(() => {
+    progressBar.style.display = 'none';
+    progressFill.style.width = '0%';
+    progressFill.textContent = '';
+  }, 1000);
+
+  resultContainer.style.display = 'block';
+}
+
 
 function displayFileInfo(file) {
   fileInfo.style.display = 'block';
