@@ -54,7 +54,12 @@ uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', handleDragOver);
 uploadArea.addEventListener('dragleave', handleDragLeave);
 uploadArea.addEventListener('drop', handleDrop);
-fileInput.addEventListener('change', handleFileSelect);
+
+fileInput.addEventListener('change', (e) => {
+  console.log("File input changed");  // Debug log
+  handleFileSelect(e);
+});
+
 fileRemove.addEventListener('click', resetConverter);
 convertBtn.addEventListener('click', convertFile);
 document.getElementById('addMoreFiles').addEventListener('click', () => {
