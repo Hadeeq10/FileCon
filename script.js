@@ -137,19 +137,23 @@ async function convertFile() {
   resultContainer.innerHTML = '';
   result.results.forEach(file => {
     const link = document.createElement('a');
-    link.href = `data:application/octet-stream;base64,${file.content}`;
-    link.download = file.filename;
+   
+    link.href = '#';
     link.className = 'download-link';
     link.textContent = `⬇ Download ${file.filename}`;
-    resultContainer.appendChild(link);
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const blob = b64toBlob(file.content);
+      const url = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = url;
+      tempLink.download = file.filename;
+      tempLink.click();
+      URL.revokeObjectURL(url);
+});
+resultContainer.appendChild(link);
 
-    // Auto-trigger download
-    const tempLink = document.createElement('a');
-    tempLink.href = link.href;
-    tempLink.download = link.download;
-    document.body.appendChild(tempLink);
-    tempLink.click();
-    document.body.removeChild(tempLink);
+   
   });
 
   resultContainer.style.display = 'block';
@@ -163,3 +167,17 @@ function readFileAsBase64(file) {
     reader.readAsDataURL(file);
   });
 }
+
+function b64toBlob(base64Data, contentType = 'application/octet-stream') {
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length).fill().map((_, i) => slice.charCodeAt(i));
+    byteArrays.push(new Uint8Array(byteNumbers));
+  }
+
+  return new Blob(byteArrays, { type: contentType });
+}
+
