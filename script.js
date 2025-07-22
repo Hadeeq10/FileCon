@@ -36,7 +36,8 @@ const downloadBtn = document.getElementById('downloadBtn');
 const errorMessage = document.getElementById('errorMessage');
 const conversionTypes = document.querySelectorAll('.conversion-type');
 
-let selectedFile = null;
+let selectedFile = [];
+
 let conversionData = null;
 let currentConversionType = 'document';
 
