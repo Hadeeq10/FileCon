@@ -11,6 +11,9 @@ const toFormat = document.getElementById('toFormat');
 const convertBtn = document.getElementById('convertBtn');
 const resultContainer = document.getElementById('resultContainer');
 const errorMessage = document.getElementById('errorMessage');
+const progressBar = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+
 
 const formats = {
   document: {
