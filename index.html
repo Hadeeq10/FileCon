@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FileCon</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -10,7 +10,9 @@
 <body>
   <header class="navbar">
     <div class="logo">FileCon</div>
-     <p class="description">Easily convert files from one format to another. Just upload, choose formats, and convert!</p>
+    <p class="description">
+      Easily convert files from one format to another. Just upload, choose formats, and convert!
+    </p>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
       <i data-lucide="sun" class="icon-light"></i>
       <i data-lucide="moon" class="icon-dark"></i>
@@ -18,38 +20,45 @@
   </header>
 
   <main class="main-section">
-   
     <section class="upload-box" id="uploadArea">
-      <input type="file" id="fileInput" hidden />
+      <input type="file" id="fileInput" multiple hidden />
       <i data-lucide="upload-cloud" class="upload-icon"></i>
-      <p>Click or drag file here to upload</p>
+      <p>Click or drag files here to upload</p>
     </section>
+
+    <!-- File Info List -->
     <section id="fileInfo" class="file-info" style="display: none;">
-  <p id="fileName"></p>
-  <p id="fileSize"></p>
-  <p id="fileType"></p>
-  <button id="fileRemove">Remove File</button>
-
+      <ul id="fileList"></ul>
+      <button id="fileRemove">Remove Files</button>
       <button id="addMoreFiles" style="display: none;">Add More Files</button>
+    </section>
 
-</section>
+    <!-- Conversion Type Buttons -->
+    <section class="conversion-types">
+      <button class="conversion-type active" data-type="document">Document</button>
+      <button class="conversion-type" data-type="image">Image</button>
+      <button class="conversion-type" data-type="video">Video</button>
+      <button class="conversion-type" data-type="audio">Audio</button>
+      <button class="conversion-type" data-type="other">Other</button>
+    </section>
 
-
+    <!-- Format selectors -->
     <section class="format-selectors">
       <div class="formats">
-        <label>From</label>
+        <label for="fromFormat">From</label>
         <select id="fromFormat"></select>
       </div>
       <div class="formats">
-        <label>To</label>
+        <label for="toFormat">To</label>
         <select id="toFormat"></select>
       </div>
-     
+
       <div class="button-container">
-    <button id="convertBtn" disabled>Convert</button>
+        <button id="convertBtn" disabled>Convert</button>
       </div>
     </section>
 
+    <!-- Progress -->
     <section id="progressContainer" class="progress-box" style="display: none;">
       <div class="progress-bar">
         <div id="progressFill" class="progress-fill"></div>
@@ -57,10 +66,8 @@
       <p id="progressText">Preparing file...</p>
     </section>
 
-    <section id="resultContainer" class="result-box" style="display: none;">
-      <p>Conversion Complete!</p>
-      <button id="downloadBtn">Download</button>
-    </section>
+    <!-- Results -->
+    <section id="resultContainer" class="result-box" style="display: none;"></section>
 
     <div id="errorMessage" class="error-message" style="display: none;"></div>
   </main>
