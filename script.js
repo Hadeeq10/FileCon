@@ -1,33 +1,29 @@
 const formats = {
-    document: {
-        input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
-        output: ['pdf', 'docx', 'txt', 'rtf', 'odt', 'html']
-    },
-    image: {
-        input: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg'],
-        output: ['jpg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg']
-    },
-    video: {
-        input: ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm', 'ova'],
-        output: ['mp4', 'avi', 'mov', 'mkv', 'webm', 'gif', 'ova']
-    },
-    audio: {
-        input: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a'],
-        output: ['mp3', 'wav', 'flac', 'aac', 'ogg']
-    },
-    other: {
-        input: ['zip', 'rar', '7z', 'html'],
-        output: ['zip', 'html']
-    }
+  document: {
+    input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
+    output: ['pdf', 'docx', 'txt', 'rtf', 'odt', 'html']
+  },
+  image: {
+    input: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg'],
+    output: ['jpg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg']
+  },
+  video: {
+    input: ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm'],
+    output: ['mp4', 'avi', 'mov', 'mkv', 'webm', 'gif']
+  },
+  audio: {
+    input: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a'],
+    output: ['mp3', 'wav', 'flac', 'aac', 'ogg']
+  }
 };
 
 // DOM elements
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const fileInfo = document.getElementById('fileInfo');
-const fileList = document.getElementById('fileList');  // changed from single file info to list
+const fileList = document.getElementById('fileList');
 const fileRemove = document.getElementById('fileRemove');
-const addMoreFiles = document.getElementById('addMoreFiles');
+const addMoreFilesBtn = document.getElementById('addMoreFiles');
 const fromFormat = document.getElementById('fromFormat');
 const toFormat = document.getElementById('toFormat');
 const convertBtn = document.getElementById('convertBtn');
@@ -35,269 +31,247 @@ const progressContainer = document.getElementById('progressContainer');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
 const resultContainer = document.getElementById('resultContainer');
+const downloadLinks = document.getElementById('downloadLinks');
 const errorMessage = document.getElementById('errorMessage');
-const conversionTypes = document.querySelectorAll('.conversion-type');
 
 let selectedFiles = [];
 let currentConversionType = 'document';
 
-// Initialize UI formats dropdowns
-updateFormatOptions();
-
 // Event listeners
 uploadArea.addEventListener('click', () => fileInput.click());
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); });
-uploadArea.addEventListener('drop', e => {
-    e.preventDefault();
-    uploadArea.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length) {
-        handleMultipleFiles(files);
-    }
+uploadArea.addEventListener('dragover', handleDragOver);
+uploadArea.addEventListener('dragleave', handleDragLeave);
+uploadArea.addEventListener('drop', handleDrop);
+
+fileInput.addEventListener('change', (e) => {
+  handleFileSelection(e.target.files);
 });
 
-fileInput.addEventListener('change', e => {
-    if (e.target.files.length) {
-        handleMultipleFiles(e.target.files);
-    }
+fileRemove.addEventListener('click', () => {
+  resetConverter();
 });
 
-addMoreFiles.addEventListener('click', () => fileInput.click());
+addMoreFilesBtn.addEventListener('click', () => {
+  fileInput.click();
+});
 
-fileRemove.addEventListener('click', resetConverter);
-
+fromFormat.addEventListener('change', updateToFormatOptions);
+toFormat.addEventListener('change', checkConvertReady);
 convertBtn.addEventListener('click', convertFile);
 
-conversionTypes.forEach(type => {
-    type.addEventListener('click', () => {
-        conversionTypes.forEach(t => t.classList.remove('active'));
-        type.classList.add('active');
-        currentConversionType = type.dataset.type;
-        updateFormatOptions();
-        hideError();
-        resetFiles();
-    });
-});
+function handleDragOver(e) {
+  e.preventDefault();
+  uploadArea.classList.add('dragover');
+}
 
-fromFormat.addEventListener('change', () => {
-    updateToFormatOptions();
-    checkConvertReady();
-});
-toFormat.addEventListener('change', checkConvertReady);
+function handleDragLeave(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+}
 
+function handleDrop(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  if (e.dataTransfer.files.length) {
+    handleFileSelection(e.dataTransfer.files);
+  }
+}
 
-// Functions
-
-function handleMultipleFiles(files) {
-    const fileArray = Array.from(files);
-
-    // Filter files to be same type as the first selected file extension category
-    if (selectedFiles.length === 0) {
-        const firstExt = fileArray[0].name.split('.').pop().toLowerCase();
-        const category = findCategoryByExtension(firstExt);
-        if (!category) {
-            showError('Unsupported file format.');
-            return;
-        }
-        currentConversionType = category;
-        conversionTypes.forEach(t => t.classList.remove('active'));
-        document.querySelector(`[data-type="${category}"]`).classList.add('active');
-        updateFormatOptions();
+function handleFileSelection(files) {
+  for (const file of files) {
+    // Avoid duplicate files
+    if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
     }
+  }
 
-    // Filter files to ensure they match currentConversionType input formats
-    const allowedExts = formats[currentConversionType].input;
-    const validFiles = fileArray.filter(f => {
-        const ext = f.name.split('.').pop().toLowerCase();
-        return allowedExts.includes(ext);
-    });
-
-    if (validFiles.length !== fileArray.length) {
-        showError(`Only ${currentConversionType} files are allowed.`);
-        return;
-    }
-
-    selectedFiles = selectedFiles.concat(validFiles);
-    displayFileList();
+  if (selectedFiles.length) {
+    detectFileFormat(selectedFiles[0]);
+    displayFileInfo();
     uploadArea.style.display = 'none';
-    addMoreFiles.style.display = 'inline-block';
+    addMoreFilesBtn.style.display = 'inline-block';
     hideError();
     checkConvertReady();
-
-    // Auto-detect fromFormat from first file if not set
-    if (!fromFormat.value && selectedFiles.length > 0) {
-        const ext = selectedFiles[0].name.split('.').pop().toLowerCase();
-        fromFormat.value = ext;
-        updateToFormatOptions();
-    }
+  }
 }
 
-function findCategoryByExtension(ext) {
-    for (const [category, obj] of Object.entries(formats)) {
-        if (obj.input.includes(ext)) {
-            return category;
-        }
-    }
-    return null;
-}
+function displayFileInfo() {
+  if (!selectedFiles.length) {
+    fileInfo.style.display = 'none';
+    return;
+  }
 
-function displayFileList() {
-    fileInfo.style.display = 'block';
-    fileList.innerHTML = ''; // clear current list
+  fileInfo.style.display = 'block';
+  fileList.innerHTML = '';
 
-    selectedFiles.forEach((file, idx) => {
-        const li = document.createElement('li');
-        li.textContent = `${file.name} (${formatFileSize(file.size)})`;
-        fileList.appendChild(li);
+  selectedFiles.forEach((file, index) => {
+    const card = document.createElement('div');
+    card.className = 'file-card';
+
+    const nameP = document.createElement('p');
+    nameP.textContent = file.name;
+
+    const sizeSmall = document.createElement('small');
+    sizeSmall.textContent = formatFileSize(file.size);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.className = 'remove-single';
+    removeBtn.addEventListener('click', () => {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length === 0) resetConverter();
+      else displayFileInfo();
+      checkConvertReady();
     });
+
+    card.appendChild(nameP);
+    card.appendChild(sizeSmall);
+    card.appendChild(removeBtn);
+
+    fileList.appendChild(card);
+  });
 }
 
 function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function detectFileFormat(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  for (const [type, typeFormats] of Object.entries(formats)) {
+    if (typeFormats.input.includes(ext)) {
+      currentConversionType = type;
+      updateFormatOptions();
+      fromFormat.value = ext;
+      updateToFormatOptions();
+      return;
+    }
+  }
+  // default to document if unknown
+  currentConversionType = 'document';
+  updateFormatOptions();
 }
 
 function updateFormatOptions() {
-    const typeFormats = formats[currentConversionType];
+  const typeFormats = formats[currentConversionType];
+  fromFormat.innerHTML = '<option value="">Select input format</option>';
+  toFormat.innerHTML = '<option value="">Select output format</option>';
 
-    fromFormat.innerHTML = '<option value="">Select input format</option>';
-    toFormat.innerHTML = '<option value="">Select output format</option>';
+  typeFormats.input.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f.toUpperCase();
+    fromFormat.appendChild(opt);
+  });
 
-    typeFormats.input.forEach(format => {
-        const opt = document.createElement('option');
-        opt.value = format;
-        opt.textContent = format.toUpperCase();
-        fromFormat.appendChild(opt);
-    });
-
-    typeFormats.output.forEach(format => {
-        const opt = document.createElement('option');
-        opt.value = format;
-        opt.textContent = format.toUpperCase();
-        toFormat.appendChild(opt);
-    });
-
-    fromFormat.value = '';
-    toFormat.value = '';
+  typeFormats.output.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f.toUpperCase();
+    toFormat.appendChild(opt);
+  });
 }
 
 function updateToFormatOptions() {
-    const selectedFrom = fromFormat.value;
-    const typeFormats = formats[currentConversionType];
+  const selectedFrom = fromFormat.value;
+  const typeFormats = formats[currentConversionType];
 
-    toFormat.innerHTML = '<option value="">Select output format</option>';
+  toFormat.innerHTML = '<option value="">Select output format</option>';
 
-    typeFormats.output.forEach(format => {
-        if (format !== selectedFrom) {
-            const opt = document.createElement('option');
-            opt.value = format;
-            opt.textContent = format.toUpperCase();
-            toFormat.appendChild(opt);
-        }
-    });
+  typeFormats.output.forEach(format => {
+    if (format !== selectedFrom) {
+      const opt = document.createElement('option');
+      opt.value = format;
+      opt.textContent = format.toUpperCase();
+      toFormat.appendChild(opt);
+    }
+  });
+
+  checkConvertReady();
 }
 
 function checkConvertReady() {
-    convertBtn.disabled = !(selectedFiles.length > 0 && fromFormat.value && toFormat.value);
+  const ready = selectedFiles.length > 0 && fromFormat.value && toFormat.value;
+  convertBtn.disabled = !ready;
 }
 
-function showError(message) {
-    errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
+function showError(msg) {
+  errorMessage.textContent = msg;
+  errorMessage.style.display = 'block';
 }
 
 function hideError() {
-    errorMessage.style.display = 'none';
-}
-
-function resetFiles() {
-    selectedFiles = [];
-    fileList.innerHTML = '';
-    fileInfo.style.display = 'none';
-    uploadArea.style.display = 'block';
-    addMoreFiles.style.display = 'none';
-    fromFormat.value = '';
-    toFormat.value = '';
-    convertBtn.disabled = true;
+  errorMessage.style.display = 'none';
 }
 
 function resetConverter() {
-    resetFiles();
-    hideError();
-    resultContainer.style.display = 'none';
-    progressContainer.style.display = 'none';
-    fileInput.value = '';
+  selectedFiles = [];
+  fileInfo.style.display = 'none';
+  uploadArea.style.display = 'block';
+  addMoreFilesBtn.style.display = 'none';
+  fromFormat.value = '';
+  toFormat.value = '';
+  fileInput.value = '';
+  convertBtn.disabled = true;
+  resultContainer.style.display = 'none';
+  downloadLinks.innerHTML = '';
+  hideError();
 }
 
 async function convertFile() {
-    if (selectedFiles.length === 0) return;
+  if (!selectedFiles.length) return;
 
-    convertBtn.disabled = true;
-    showProgress();
+  convertBtn.disabled = true;
+  progressContainer.style.display = 'block';
+  progressFill.style.width = '0%';
+  progressText.textContent = 'Starting conversion...';
+  errorMessage.style.display = 'none';
+  resultContainer.style.display = 'none';
+  downloadLinks.innerHTML = '';
 
-    try {
-        const base64Files = await Promise.all(selectedFiles.map(file => readFileAsBase64(file)));
-        const payloadFiles = selectedFiles.map((file, i) => ({
-            filename: file.name,
-            fileData: base64Files[i]
-        }));
+  try {
+    // For demonstration: simulate progress and fake conversion delay
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = `Converting... ${progress}%`;
+      if (progress >= 100) clearInterval(interval);
+    }, 200);
 
-        const response = await fetch('/.netlify/functions/convert', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fromFormat: fromFormat.value,
-                toFormat: toFormat.value,
-                files: payloadFiles
-            })
-        });
+    await new Promise(r => setTimeout(r, 2200));
 
-        const data = await response.json();
+    // Normally here you'd call your API to convert the file(s)
 
-        if (!response.ok) throw new Error(data.error || 'Conversion failed.');
-
-        showResults(data.results);
-    } catch (error) {
-        showError(error.message);
-    } finally {
-        hideProgress();
-        convertBtn.disabled = false;
-    }
-}
-
-function readFileAsBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-function showProgress() {
-    progressContainer.style.display = 'block';
-    progressFill.style.width = '0%';
-    progressText.textContent = 'Converting...';
-}
-
-function hideProgress() {
+    // Show result and download links (fake links here)
+    progressText.textContent = 'Conversion Complete!';
+    progressFill.style.width = '100%';
     progressContainer.style.display = 'none';
-}
 
-function showResults(results) {
-    resultContainer.innerHTML = '';
     resultContainer.style.display = 'block';
 
-    results.forEach(file => {
-        const link = document.createElement('a');
-        link.href = `data:application/octet-stream;base64,${file.content}`;
-        link.download = file.filename;
-        link.textContent = `Download ${file.filename}`;
-        link.className = 'download-link';
-        resultContainer.appendChild(link);
+    // Show download links for each file (simulate .converted extension)
+    selectedFiles.forEach(file => {
+      const link = document.createElement('a');
+      link.href = '#'; // Your converted file URL here
+      link.textContent = `Download ${file.name} (converted)`;
+      link.className = 'download-link';
+      link.style.display = 'block';
+      link.style.marginBottom = '0.5rem';
+      downloadLinks.appendChild(link);
     });
+
+  } catch (err) {
+    showError('Error during conversion: ' + err.message);
+  } finally {
+    convertBtn.disabled = false;
+  }
 }
+
+// Initialize
+resetConverter();
