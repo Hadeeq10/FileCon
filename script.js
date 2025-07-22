@@ -14,7 +14,6 @@ const errorMessage = document.getElementById('errorMessage');
 const progressBar = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
 
-
 const formats = {
   document: {
     input: ['pdf', 'docx', 'doc', 'txt', 'rtf', 'odt', 'pages'],
@@ -68,6 +67,50 @@ fromFormat.addEventListener('change', updateToFormatOptions);
 toFormat.addEventListener('change', () => {
   convertBtn.disabled = !(selectedFile && fromFormat.value && toFormat.value);
 });
+
+convertBtn.addEventListener('click', convertFile); // ✅ connect button
+
+function displayFileInfo(file) {
+  fileInfo.style.display = 'block';
+  fileName.textContent = `Name: ${file.name}`;
+  fileSize.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
+  fileType.textContent = `Type: ${file.type || 'Unknown'}`;
+}
+
+function detectFileFormat(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  let category = Object.keys(formats).find(cat => formats[cat].input.includes(ext)) || 'document';
+  const typeFormats = formats[category];
+
+  fromFormat.innerHTML = '<option value="">Select input format</option>';
+  toFormat.innerHTML = '<option value="">Select output format</option>';
+
+  typeFormats.input.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f.toUpperCase();
+    fromFormat.appendChild(opt);
+  });
+
+  typeFormats.output.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f.toUpperCase();
+    toFormat.appendChild(opt);
+  });
+
+  fromFormat.value = ext;
+  updateToFormatOptions();
+}
+
+function updateToFormatOptions() {
+  const from = fromFormat.value;
+  const toOptions = toFormat.querySelectorAll('option');
+  toOptions.forEach(opt => {
+    opt.disabled = opt.value === from;
+  });
+  convertBtn.disabled = !(selectedFile && fromFormat.value && toFormat.value);
+}
 
 async function convertFile() {
   if (!selectedFile) return;
@@ -147,98 +190,6 @@ async function convertFile() {
   resultContainer.style.display = 'block';
 }
 
-
-function displayFileInfo(file) {
-  fileInfo.style.display = 'block';
-  fileName.textContent = `Name: ${file.name}`;
-  fileSize.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
-  fileType.textContent = `Type: ${file.type || 'Unknown'}`;
-}
-
-function detectFileFormat(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
-  let category = Object.keys(formats).find(cat => formats[cat].input.includes(ext)) || 'document';
-  const typeFormats = formats[category];
-
-  fromFormat.innerHTML = '<option value="">Select input format</option>';
-  toFormat.innerHTML = '<option value="">Select output format</option>';
-
-  typeFormats.input.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = f;
-    opt.textContent = f.toUpperCase();
-    fromFormat.appendChild(opt);
-  });
-
-  typeFormats.output.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = f;
-    opt.textContent = f.toUpperCase();
-    toFormat.appendChild(opt);
-  });
-
-  fromFormat.value = ext;
-  updateToFormatOptions();
-}
-
-function updateToFormatOptions() {
-  const from = fromFormat.value;
-  const toOptions = toFormat.querySelectorAll('option');
-  toOptions.forEach(opt => {
-    opt.disabled = opt.value === from;
-  });
-  convertBtn.disabled = !(selectedFile && fromFormat.value && toFormat.value);
-}
-
-async function convertFile() {
-  if (!selectedFile) return;
-
-  const base64 = await readFileAsBase64(selectedFile);
-  const response = await fetch('/.netlify/functions/convert', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fromFormat: fromFormat.value,
-      toFormat: toFormat.value,
-      files: [{
-        filename: selectedFile.name,
-        fileData: base64
-      }]
-    })
-  });
-
-  const result = await response.json();
-  if (!response.ok || !result.results) {
-    errorMessage.textContent = result.error || 'Conversion failed';
-    errorMessage.style.display = 'block';
-    return;
-  }
-
-  resultContainer.innerHTML = '';
-  result.results.forEach(file => {
-    const link = document.createElement('a');
-   
-    link.href = '#';
-    link.className = 'download-link';
-    link.textContent = `⬇ Download ${file.filename}`;
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const blob = b64toBlob(file.content);
-      const url = URL.createObjectURL(blob);
-      const tempLink = document.createElement('a');
-      tempLink.href = url;
-      tempLink.download = file.filename;
-      tempLink.click();
-      URL.revokeObjectURL(url);
-});
-resultContainer.appendChild(link);
-
-   
-  });
-
-  resultContainer.style.display = 'block';
-}
-
 function readFileAsBase64(file) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
@@ -260,4 +211,3 @@ function b64toBlob(base64Data, contentType = 'application/octet-stream') {
 
   return new Blob(byteArrays, { type: contentType });
 }
-
