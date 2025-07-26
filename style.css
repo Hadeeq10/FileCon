@@ -175,4 +175,29 @@ button#convertBtn:disabled {
   text-decoration: underline;
 }
 
+.header {
+  background-color: #004aad;
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.site-tagline {
+  margin: 5px 0 0;
+  font-size: 16px;
+  font-weight: 300;
+  opacity: 0.95;
+}
 
