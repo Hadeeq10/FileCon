@@ -176,30 +176,33 @@ button#convertBtn:disabled {
 }
 
 .header {
-  background-color: #1f2937; /* dark neutral blue-gray */
-  color: #f3f4f6; /* soft light text */
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   padding: 40px 0 30px;
-  border-bottom: 2px solid #3b82f6; /* future blue accent */
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.header-container {
-  max-width: 700px;
+.header-wrapper {
+  max-width: 800px;
   margin: 0 auto;
-  text-align: center;
   padding: 0 20px;
+  text-align: center;
 }
 
 .site-title {
-  font-size: 34px;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin: 0;
+  letter-spacing: 1px;
   color: #ffffff;
-  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .site-tagline {
-  margin-top: 10px;
-  font-size: 15.5px;
-  font-weight: 400;
-  color: #d1d5db; /* muted silver */
+  font-size: 1.125rem;
+  font-weight: 300;
+  color: #d1e2f0;
+  margin: 0;
+  line-height: 1.6;
 }
+
