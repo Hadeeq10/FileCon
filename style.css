@@ -176,28 +176,30 @@ button#convertBtn:disabled {
 }
 
 .header {
-  background: linear-gradient(90deg, #003366, #0059b3);
-  color: #ffffff;
-  padding: 30px 0;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  background-color: #1f2937; /* dark neutral blue-gray */
+  color: #f3f4f6; /* soft light text */
+  padding: 40px 0 30px;
+  border-bottom: 2px solid #3b82f6; /* future blue accent */
 }
 
 .header-container {
   max-width: 700px;
   margin: 0 auto;
   text-align: center;
+  padding: 0 20px;
 }
 
 .site-title {
-  font-size: 36px;
-  margin: 0;
+  font-size: 34px;
   font-weight: 700;
-  letter-spacing: 1px;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.5px;
 }
 
 .site-tagline {
   margin-top: 10px;
-  font-size: 16px;
-  font-weight: 300;
-  color: #e0e0e0;
+  font-size: 15.5px;
+  font-weight: 400;
+  color: #d1d5db; /* muted silver */
 }
