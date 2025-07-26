@@ -176,10 +176,15 @@ button#convertBtn:disabled {
 }
 
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  padding: 40px 0 30px;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 18px 0 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
 }
 
 .header-wrapper {
@@ -190,19 +195,18 @@ button#convertBtn:disabled {
 }
 
 .site-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #ffffff;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .site-tagline {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 300;
   color: #d1e2f0;
-  margin: 0;
-  line-height: 1.6;
+  margin: 4px 0 0;
+  line-height: 1.4;
 }
-
