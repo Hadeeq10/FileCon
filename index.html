@@ -33,18 +33,14 @@
 
     <input type="file" id="fileInput" hidden />
 
-  <div class="file-info" id="fileInfo">
-  <div class="file-card">
-    <div class="file-meta">
-      <div class="file-icon">📄</div>
-      <div class="file-text">
-        <p class="file-name" id="fileName">filename.xyz</p>
-        <p class="file-size" id="fileSize">2.3 MB</p>
+  <div id="fileInfo" class="file-info" style="display: none;">
+      <div class="file-details">
+        <p id="fileName"></p>
+        <p id="fileSize"></p>
+        <p id="fileType"></p>
+        <button id="fileRemove">Remove</button>
       </div>
     </div>
-    <button id="fileRemove">Remove</button>
-  </div>
-</div>
 
     <button id="addMoreFiles" style="display: none;">Add More Files</button>
 
