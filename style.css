@@ -175,32 +175,22 @@ button#convertBtn:disabled {
   text-decoration: underline;
 }
 
-/* --- Sleek, Fixed Header --- */
 .fixed-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   background: linear-gradient(135deg, #101820, #1c2b3a);
-  padding: 10px 0;
+  padding: 12px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 1000;
 }
 
-.header-wrapper {
-  max-width: 900px;
+.header-container {
+  max-width: 600px; /* Match .container exactly */
   margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-}
-
-.brand-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 0 20px;
 }
 
 .site-title {
@@ -220,12 +210,11 @@ button#convertBtn:disabled {
   letter-spacing: 0.4px;
 }
 
-/* Adjust page content */
 .container {
-  margin-top: 80px;
+  margin-top: 85px; /* Space below fixed header */
 }
 
-/* Responsive adjustments */
+/* Responsive tweaks */
 @media (max-width: 480px) {
   .site-title {
     font-size: 1.3rem;
@@ -235,11 +224,16 @@ button#convertBtn:disabled {
     font-size: 0.75rem;
   }
 
+  .header-container,
   .container {
-    margin-top: 70px;
     padding: 0 10px;
   }
+
+  .container {
+    margin-top: 75px;
+  }
 }
+
 
 
 /* --- Footer --- */
