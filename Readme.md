@@ -1,4 +1,4 @@
-# FileCon - File Conversion Application
+# FileCave - File Conversion Application
 
 A modern, user-friendly web application for converting various file formats including documents, images, videos, and audio files.
 
@@ -20,7 +20,7 @@ A modern, user-friendly web application for converting various file formats incl
 ## Project Structure
 
 ```
-FileCon/
+FileCave/
 ├── index.html          # Main HTML file
 ├── style.css           # CSS styles
 ├── script.js           # Main JavaScript functionality
@@ -230,3 +230,4 @@ For support and questions:
 - Check the troubleshooting section
 - Review the configuration options
 - Submit issues through the project repository
+
